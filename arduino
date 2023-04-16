@@ -1,0 +1,32 @@
+const int sensorPin = 2;
+const int outPin = 13;
+int count = 0;
+
+void setup() {
+  // Serial.begin(9600);
+  pinMode(sensorPin, INPUT_PULLUP);
+  pinMode(outPin, OUTPUT);
+
+  if (digitalRead(sensorPin) == HIGH) {
+    attachInterrupt(digitalPinToInterrupt(sensorPin), check1, CHANGE);
+  } else {
+    attachInterrupt(digitalPinToInterrupt(sensorPin), check2, CHANGE);
+  }
+}
+
+void check1() {
+  digitalWrite(outPin, !digitalRead(outPin));
+  delay(100);
+}
+
+void check2() {
+  count++;
+  if (count >= 4) {
+    digitalWrite(outPin, !digitalRead(outPin));
+    delay(50);
+    count = 0;
+  }
+}
+
+void loop() {
+}
