@@ -1,6 +1,14 @@
 const int sensorPin = 2;
 const int outPin = 13;
-int count = 0;
+byte count = 0;
+byte crawlCount = 0;
+
+const int LONG_PRESS_TIME  = 1000; // 1000 milliseconds
+int lastState = HIGH;  // the previous state from the input pin
+int currentState;     // the current reading from the input pin
+unsigned long pressedTime  = 0;
+bool isPressing = false;
+bool isLongDetected = false;
 
 void setup() {
   // Serial.begin(9600);
@@ -20,13 +28,42 @@ void check1() {
 }
 
 void check2() {
-  count++;
-  if (count >= 4) {
+  if (crawlCount < 10) {
     digitalWrite(outPin, !digitalRead(outPin));
-    delay(50);
-    count = 0;
+    delay(100);
+    crawlCount++;
+  } else {
+    count++;
+    if (count >= 4) {
+      digitalWrite(outPin, !digitalRead(outPin));
+      delay(100);
+      count = 0;
+    }
   }
 }
 
 void loop() {
+
+  currentState = !digitalRead(sensorPin);
+
+if(lastState == HIGH && currentState == LOW) {        // button is pressed
+    pressedTime = millis();
+    isPressing = true;
+    isLongDetected = false;
+  } else if(lastState == LOW && currentState == HIGH) { // button is released
+    isPressing = false;
+  }
+
+  if(isPressing == true && isLongDetected == false) {
+    long pressDuration = millis() - pressedTime;
+
+    if( pressDuration > LONG_PRESS_TIME ) {
+      //Serial.println("A long press is detected");
+      crawlCount=0;
+      isLongDetected = true;
+    }
+  }
+
+  // save the the last state
+  lastState = currentState;
 }
